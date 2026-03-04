@@ -108,8 +108,11 @@
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-slate-700 font-bold mb-1">Retail Price ($)</label>
-                        <input type="number" step="0.01" name="price" required class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="0.00">
+                        <label class="block text-slate-700 font-bold mb-1">Retail Price</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500 font-bold">$</span>
+                            <input type="number" step="0.01" name="price" required class="input-field w-full pl-8 pr-3 py-3 border border-slate-300 rounded-lg outline-none" placeholder="0.00">
+                        </div>
                     </div>
                     <div>
                          <label class="block text-slate-700 font-bold mb-1">Photo</label>
@@ -161,24 +164,11 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-slate-600 font-semibold text-sm mb-1">Weight (oz)</label>
-                                <input type="number" step="0.1" name="weight" class="input-field w-full p-3 border border-slate-300 rounded-lg bg-white" placeholder="0.0">
-                            </div>
-                            <div>
-                                <label class="block text-slate-600 font-semibold text-sm mb-1">Dimensions (LxWxH)</label>
-                                <input type="text" name="dimensions" class="input-field w-full p-3 border border-slate-300 rounded-lg bg-white" placeholder="4x4x2">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-slate-600 font-semibold text-sm mb-1">Tags (Comma separated)</label>
-                            <input type="text" name="tags" class="input-field w-full p-3 border border-slate-300 rounded-lg bg-white" placeholder="Gold, 14k, Gift, Summer">
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-slate-600 font-semibold text-sm mb-1">COGS ($)</label>
-                                <input type="number" step="0.01" name="cogs" class="input-field w-full p-3 border border-slate-300 rounded-lg bg-white border-red-200" placeholder="Cost (Private)">
+                                <label class="block text-slate-600 font-semibold text-sm mb-1">COGS</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500 font-bold">$</span>
+                                    <input type="number" step="0.01" name="cogs" class="input-field w-full pl-8 pr-3 py-3 border border-slate-300 rounded-lg bg-white border-red-200" placeholder="Cost (Private)">
+                                </div>
                             </div>
                         </div>
 
@@ -214,8 +204,11 @@
                         <input type="text" name="invoiceId" required class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="INV-001">
                     </div>
                      <div>
-                        <label class="block text-slate-700 font-bold mb-1">Amount ($)</label>
-                        <input type="number" step="0.01" name="amount" required class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="0.00">
+                        <label class="block text-slate-700 font-bold mb-1">Amount</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500 font-bold">$</span>
+                            <input type="number" step="0.01" name="amount" required class="input-field w-full pl-8 pr-3 py-3 border border-slate-300 rounded-lg outline-none" placeholder="0.00">
+                        </div>
                     </div>
                 </div>
 
@@ -260,7 +253,7 @@
 
     <script>
         // *** PASTE YOUR DEPLOYED GOOGLE SCRIPT URL HERE ***
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQvYQ1EAXjMeOvHke7k0RBfH6_ldGDcwAgzqbne1QB4hYKTDKfgMuVhBQULEhqeauv/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0V8xzVD-30M5mIQrexNrFzP7uyQ7c6SO2PwHly2zTTNmjk1MwhL0BvCZGTYEY03ca/exec'; 
 
         function toggleEcommerce() {
             const checkBox = document.getElementById('online-toggle');
