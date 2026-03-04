@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kismet Jewelry Database</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        .input-field {
+            transition: all 0.2s ease;
+            font-size: 1.05rem;
+        }
+        .input-field:focus {
+            border-color: #D4AF37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+        }
+        
+        /* Smooth expand animation for online section */
+        #ecommerce-fields {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, opacity 0.4s ease;
+            opacity: 0;
+        }
+        #ecommerce-fields.open {
+            max-height: 1200px; /* Arbitrary large height */
+            opacity: 1;
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #D4AF37;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .mode-btn.active {
+            background-color: #2C3E50;
+            color: #D4AF37;
+            border-bottom: 4px solid #D4AF37;
+        }
+        .mode-btn {
+            color: #64748b;
+            background-color: #f1f5f9;
+            border-bottom: 4px solid transparent;
+        }
+        
+        /* Custom Checkbox */
+        .toggle-checkbox:checked {
+            background-color: #D4AF37;
+            border-color: #D4AF37;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col items-center py-6 px-4">
+
+    <!-- Header -->
+    <header class="text-center mb-6 max-w-2xl w-full">
+        <h1 class="text-3xl font-bold text-slate-800 mb-2 tracking-tight">
+            <i class="fa-solid fa-gem text-yellow-600 mr-2"></i>Kismet Jewelry
+        </h1>
+        <p class="text-slate-500">Internal Database & Invoice System</p>
+    </header>
+
+    <!-- Main Container -->
+    <main class="w-full max-w-xl bg-white rounded-xl shadow-xl overflow-hidden border border-slate-200">
+        
+        <!-- Tabs -->
+        <div class="flex text-lg font-bold">
+            <button onclick="switchMode('inventory')" id="btn-inventory" class="mode-btn active flex-1 py-5 flex flex-col items-center justify-center transition-all">
+                <i class="fa-solid fa-ring text-xl mb-1"></i>
+                Inventory
+            </button>
+            <button onclick="switchMode('invoice')" id="btn-invoice" class="mode-btn flex-1 py-5 flex flex-col items-center justify-center transition-all">
+                <i class="fa-solid fa-file-invoice-dollar text-xl mb-1"></i>
+                Invoices
+            </button>
+        </div>
+
+        <!-- Inventory Form -->
+        <div id="inventory-section" class="p-6">
+            <form onsubmit="handleSubmit(event, 'inventory')" class="space-y-4">
+                
+                <!-- Basic Info -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="col-span-1 md:col-span-2">
+                        <label class="block text-slate-700 font-bold mb-1">Item Name (Internal)</label>
+                        <input type="text" name="itemName" required class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="e.g. Gold Band 14k">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">SKU</label>
+                        <input type="text" name="sku" required class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="RNG-001">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Quantity</label>
+                        <input type="number" name="qty" required class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="1">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Retail Price ($)</label>
+                        <input type="number" step="0.01" name="price" required class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="0.00">
+                    </div>
+                    <div>
+                         <label class="block text-slate-700 font-bold mb-1">Photo</label>
+                        <input type="file" name="file" accept="image/*" class="w-full text-sm text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-700 font-bold mb-1">Internal Notes</label>
+                    <textarea name="notes" rows="2" class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="Stone source, defects, location..."></textarea>
+                </div>
+
+                <!-- E-Commerce Toggle -->
+                <div class="mt-6 pt-6 border-t border-slate-200">
+                    <label class="flex items-center cursor-pointer space-x-3">
+                        <input type="checkbox" name="isOnline" id="online-toggle" onchange="toggleEcommerce()" class="toggle-checkbox form-checkbox h-6 w-6 text-yellow-600 rounded focus:ring-yellow-500 border-gray-300 transition duration-150 ease-in-out">
+                        <span class="text-lg font-bold text-slate-800">List this item Online?</span>
+                    </label>
+                    <p class="text-slate-500 text-sm ml-9">Check this to add website details (Shipping, SEO, Public Desc).</p>
+                </div>
+
+                <!-- Hidden E-Commerce Fields -->
+                <div id="ecommerce-fields" class="bg-slate-50 rounded-lg border border-slate-200 px-4 mt-2">
+                    <div class="py-4 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="col-span-1 md:col-span-2">
+                                <label class="block text-slate-600 font-semibold text-sm mb-1">Public Title (For Website)</label>
+                                <input type="text" name="publicTitle" class="input-field w-full p-3 border border-slate-300 rounded-lg bg-white" placeholder="Marketing Name">
+                            </div>
+
+                            <div>
+                                <label class="block text-slate-600 font-semibold text-sm mb-1">URL Handle</label>
+                                <input type="text" name="handle" class="input-field w-full p-3 border border-slate-300 rounded-lg bg-white" placeholder="gold-ring-001">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-slate-600 font-semibold text-sm mb-1">Category</label>
+                                <select name="category" class="input-field w-full p-3 border border-slate-300 rounded-lg bg-white">
+                                    <option value="">Select...</option>
+                                    <option value="Rings">Rings</option>
+                                    <option value="Necklaces">Necklaces</option>
+                                    <option value="Earrings">Earrings</option>
+                                    <option value="Bracelets">Bracelets</option>
+                                    <option value="Bridal">Bridal</option>
+                                    <option value="Vintage">Vintage</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-slate-600 font-semibold text-sm mb-1">Weight (oz)</label>
+                                <input type="number" step="0.1" name="weight" class="input-field w-full p-3 border border-slate-300 rounded-lg bg-white" placeholder="0.0">
+                            </div>
+                            <div>
+                                <label class="block text-slate-600 font-semibold text-sm mb-1">Dimensions (LxWxH)</label>
+                                <input type="text" name="dimensions" class="input-field w-full p-3 border border-slate-300 rounded-lg bg-white" placeholder="4x4x2">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-slate-600 font-semibold text-sm mb-1">Tags (Comma separated)</label>
+                            <input type="text" name="tags" class="input-field w-full p-3 border border-slate-300 rounded-lg bg-white" placeholder="Gold, 14k, Gift, Summer">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-slate-600 font-semibold text-sm mb-1">COGS ($)</label>
+                                <input type="number" step="0.01" name="cogs" class="input-field w-full p-3 border border-slate-300 rounded-lg bg-white border-red-200" placeholder="Cost (Private)">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-slate-600 font-semibold text-sm mb-1">Public Description (HTML allowed)</label>
+                            <textarea name="publicDesc" rows="3" class="input-field w-full p-3 border border-slate-300 rounded-lg bg-white" placeholder="Beautiful handcrafted..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <!-- End E-Commerce Fields -->
+
+                <button type="submit" class="submit-btn w-full bg-slate-800 text-white font-bold text-lg py-4 rounded-xl hover:bg-slate-700 transition-colors shadow-lg mt-2">
+                    Add to Inventory
+                </button>
+            </form>
+        </div>
+
+        <!-- Invoice Form -->
+        <div id="invoice-section" class="hidden p-6">
+             <div class="mb-4 bg-blue-50 p-3 rounded-lg border border-blue-100 flex items-center">
+                <i class="fa-solid fa-camera text-blue-500 text-xl mr-3"></i>
+                <p class="text-blue-800 text-sm font-medium">Upload photos of paper invoices here.</p>
+            </div>
+
+            <form onsubmit="handleSubmit(event, 'invoice')" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-slate-700 font-bold mb-1">Vendor</label>
+                        <input type="text" name="vendor" required class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="Vendor Name">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Invoice #</label>
+                        <input type="text" name="invoiceId" required class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="INV-001">
+                    </div>
+                     <div>
+                        <label class="block text-slate-700 font-bold mb-1">Amount ($)</label>
+                        <input type="number" step="0.01" name="amount" required class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="0.00">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Due Date</label>
+                        <input type="date" name="dueDate" required class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Status</label>
+                        <select name="status" class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none bg-white">
+                            <option value="Unpaid">Unpaid</option>
+                            <option value="Paid">Paid</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-xl border-2 border-dashed border-slate-300 text-center mt-2">
+                    <label class="block cursor-pointer">
+                        <span class="block text-slate-600 font-semibold mb-2">Tap to Attach Photo</span>
+                        <input type="file" name="file" accept="image/*, application/pdf" required class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200">
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-btn w-full bg-blue-700 text-white font-bold text-lg py-4 rounded-xl hover:bg-blue-600 transition-colors shadow-lg mt-4">
+                    Save Invoice
+                </button>
+            </form>
+        </div>
+
+    </main>
+
+    <!-- Modal -->
+    <div id="message-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center p-4 z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl animate-bounce-in">
+            <div id="msg-icon" class="text-5xl mb-4"></div>
+            <h3 id="msg-title" class="text-xl font-bold mb-2 text-slate-800"></h3>
+            <p id="msg-body" class="text-slate-600 mb-6 text-sm"></p>
+            <button onclick="closeModal()" class="w-full bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-700">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // *** PASTE YOUR DEPLOYED GOOGLE SCRIPT URL HERE ***
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQvYQ1EAXjMeOvHke7k0RBfH6_ldGDcwAgzqbne1QB4hYKTDKfgMuVhBQULEhqeauv/exec'; 
+
+        function toggleEcommerce() {
+            const checkBox = document.getElementById('online-toggle');
+            const section = document.getElementById('ecommerce-fields');
+            if (checkBox.checked) {
+                section.classList.add('open');
+            } else {
+                section.classList.remove('open');
+            }
+        }
+
+        function switchMode(mode) {
+            const invSection = document.getElementById('inventory-section');
+            const invBtn = document.getElementById('btn-inventory');
+            const invoiceSection = document.getElementById('invoice-section');
+            const invoiceBtn = document.getElementById('btn-invoice');
+
+            if (mode === 'inventory') {
+                invSection.classList.remove('hidden');
+                invBtn.classList.add('active');
+                invoiceSection.classList.add('hidden');
+                invoiceBtn.classList.remove('active');
+            } else {
+                invSection.classList.add('hidden');
+                invBtn.classList.remove('active');
+                invoiceSection.classList.remove('hidden');
+                invoiceBtn.classList.add('active');
+            }
+        }
+
+        const readFile = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve({ data: reader.result, name: file.name, type: file.type });
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        };
+
+        async function handleSubmit(e, type) {
+            e.preventDefault();
+            if (!SCRIPT_URL) {
+                showModal('error', 'Missing URL', 'Please edit the HTML file and paste your Google Script URL.');
+                return;
+            }
+
+            const form = e.target;
+            const btn = form.querySelector('.submit-btn');
+            const originalText = btn.innerHTML;
+
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loader"></div> Saving...';
+
+            try {
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+                data.type = type;
+                
+                // Handle Checkbox boolean
+                if(type === 'inventory') {
+                    data.isOnline = document.getElementById('online-toggle').checked ? 'TRUE' : 'FALSE';
+                }
+
+                const fileInput = form.querySelector('input[type="file"]');
+                if (fileInput && fileInput.files.length > 0) {
+                    const fileData = await readFile(fileInput.files[0]);
+                    data.fileData = fileData.data;
+                    data.fileName = fileData.name;
+                }
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+
+                if (result.result === 'success') {
+                    showModal('success', 'Success!', `Entry saved to ${type} database.`);
+                    form.reset();
+                    if(type === 'inventory') {
+                        document.getElementById('ecommerce-fields').classList.remove('open');
+                    }
+                } else {
+                    throw new Error(result.error);
+                }
+
+            } catch (error) {
+                showModal('error', 'Error', 'Failed to save. Check internet connection.');
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        function showModal(type, title, body) {
+            const modal = document.getElementById('message-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.getElementById('msg-title').innerText = title;
+            document.getElementById('msg-body').innerText = body;
+            const icon = document.getElementById('msg-icon');
+            icon.innerHTML = type === 'success' 
+                ? '<i class="fa-regular fa-circle-check text-green-500"></i>' 
+                : '<i class="fa-solid fa-triangle-exclamation text-red-500"></i>';
+        }
+
+        function closeModal() {
+            document.getElementById('message-modal').classList.add('hidden');
+            document.getElementById('message-modal').classList.remove('flex');
+        }
+    </script>
+</body>
+</html>
