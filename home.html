@@ -75,18 +75,82 @@
         
         <!-- Tabs -->
         <div class="flex text-lg font-bold">
-            <button onclick="switchMode('inventory')" id="btn-inventory" class="mode-btn active flex-1 py-5 flex flex-col items-center justify-center transition-all">
+            <button onclick="switchMode('contact')" id="btn-contact" class="mode-btn active flex-1 py-5 flex flex-col items-center justify-center transition-all">
+                <i class="fa-solid fa-address-book text-xl mb-1"></i>
+                Contacts
+            </button>
+            <button onclick="switchMode('inventory')" id="btn-inventory" class="mode-btn flex-1 py-5 flex flex-col items-center justify-center transition-all border-l border-slate-200">
                 <i class="fa-solid fa-ring text-xl mb-1"></i>
                 Inventory
             </button>
-            <button onclick="switchMode('invoice')" id="btn-invoice" class="mode-btn flex-1 py-5 flex flex-col items-center justify-center transition-all">
+            <button onclick="switchMode('invoice')" id="btn-invoice" class="mode-btn flex-1 py-5 flex flex-col items-center justify-center transition-all border-l border-slate-200">
                 <i class="fa-solid fa-file-invoice-dollar text-xl mb-1"></i>
                 Invoices
             </button>
         </div>
 
+        <!-- Contact Form -->
+        <div id="contact-section" class="p-6">
+            <div class="mb-4 bg-emerald-50 p-3 rounded-lg border border-emerald-100 flex items-center">
+                <i class="fa-solid fa-users text-emerald-500 text-xl mr-3"></i>
+                <p class="text-emerald-800 text-sm font-medium">Digitize paper contact forms here.</p>
+            </div>
+            <form onsubmit="handleSubmit(event, 'contact')" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">First Name</label>
+                        <input type="text" name="firstName" required class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="Jane">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Last Name</label>
+                        <input type="text" name="lastName" required class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="Doe">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Phone Number</label>
+                        <input type="tel" name="phone" class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="(555) 123-4567">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Email Address</label>
+                        <input type="email" name="email" class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="jane@example.com">
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-200 pt-4 mt-2">
+                    <h4 class="text-slate-800 font-bold mb-3">Mailing Address</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <input type="text" name="street" class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="Street Address">
+                        </div>
+                        <div class="grid grid-cols-6 gap-4">
+                            <div class="col-span-3">
+                                <input type="text" name="city" class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="City">
+                            </div>
+                            <div class="col-span-1">
+                                <input type="text" name="state" class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="ST">
+                            </div>
+                            <div class="col-span-2">
+                                <input type="text" name="zip" class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="Zip Code">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-700 font-bold mb-1">Notes / Preferences</label>
+                    <textarea name="notes" rows="2" class="input-field w-full p-3 border border-slate-300 rounded-lg outline-none" placeholder="Interested in custom rings..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn w-full bg-emerald-700 text-white font-bold text-lg py-4 rounded-xl hover:bg-emerald-600 transition-colors shadow-lg mt-2">
+                    Save Contact
+                </button>
+            </form>
+        </div>
+
         <!-- Inventory Form -->
-        <div id="inventory-section" class="p-6">
+        <div id="inventory-section" class="hidden p-6">
             <form onsubmit="handleSubmit(event, 'inventory')" class="space-y-4">
                 
                 <!-- Basic Info -->
@@ -253,7 +317,7 @@
 
     <script>
         // *** PASTE YOUR DEPLOYED GOOGLE SCRIPT URL HERE ***
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0V8xzVD-30M5mIQrexNrFzP7uyQ7c6SO2PwHly2zTTNmjk1MwhL0BvCZGTYEY03ca/exec'; 
+        const SCRIPT_URL = ''; 
 
         function toggleEcommerce() {
             const checkBox = document.getElementById('online-toggle');
@@ -266,22 +330,16 @@
         }
 
         function switchMode(mode) {
-            const invSection = document.getElementById('inventory-section');
-            const invBtn = document.getElementById('btn-inventory');
-            const invoiceSection = document.getElementById('invoice-section');
-            const invoiceBtn = document.getElementById('btn-invoice');
-
-            if (mode === 'inventory') {
-                invSection.classList.remove('hidden');
-                invBtn.classList.add('active');
-                invoiceSection.classList.add('hidden');
-                invoiceBtn.classList.remove('active');
-            } else {
-                invSection.classList.add('hidden');
-                invBtn.classList.remove('active');
-                invoiceSection.classList.remove('hidden');
-                invoiceBtn.classList.add('active');
-            }
+            const modes = ['contact', 'inventory', 'invoice'];
+            modes.forEach(m => {
+                document.getElementById(m + '-section').classList.toggle('hidden', m !== mode);
+                const btn = document.getElementById('btn-' + m);
+                if (m === mode) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
         }
 
         const readFile = (file) => {
